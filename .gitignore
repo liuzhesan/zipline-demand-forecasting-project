@@ -1,0 +1,7 @@
+*.csv
+*.parquet
+.DS_Store
+data/
+*.csv
+*.parquet
+.DS_Store
