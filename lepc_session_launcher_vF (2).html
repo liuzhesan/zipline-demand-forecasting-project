@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LEPC Session Launcher</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0c0b09;--bg2:#141210;--bg3:#1c1915;--bg4:#242018;
+  --border:rgba(210,180,110,0.1);--border2:rgba(210,180,110,0.22);--border3:rgba(210,180,110,0.38);
+  --gold:#c8a44a;--gold2:#e8c870;--gold3:#f5dfa0;
+  --gold-dim:rgba(200,164,74,0.08);--gold-dim2:rgba(200,164,74,0.16);--gold-dim3:rgba(200,164,74,0.26);
+  --text:#ede4cc;--text2:#a8946c;--text3:#5e5038;
+  --green:#4e8a5a;--gd:rgba(78,138,90,0.12);--gb:rgba(78,138,90,0.35);
+  --blue:#4878a8;--bd:rgba(72,120,168,0.12);--bb:rgba(72,120,168,0.3);
+  --amber:#b07830;--ad:rgba(176,120,48,0.12);--ab:rgba(176,120,48,0.35);
+  --r:4px;--rl:8px;
+  --fh:'Playfair Display',Georgia,serif;
+  --fb:'Source Serif 4',Georgia,serif;
+  --fm:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px;line-height:1.65;min-height:100vh;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:var(--bg2);border-bottom:1px solid var(--border2);
+  height:56px;padding:0 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.brand{display:flex;align-items:center;gap:12px;}
+.seal{width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center;}
+.brand-title{font-family:var(--fh);font-size:17px;font-weight:600;color:var(--gold2);letter-spacing:.02em;}
+.brand-sub{font-size:10px;color:var(--text3);letter-spacing:.09em;text-transform:uppercase;margin-top:1px;}
+.gem-link{
+  display:flex;align-items:center;gap:8px;
+  background:var(--gold-dim2);border:1px solid var(--border3);border-radius:var(--rl);
+  padding:7px 14px;color:var(--gold2);font-size:12px;font-family:var(--fh);
+  text-decoration:none;transition:all .2s;
+}
+.gem-link:hover{background:var(--gold-dim3);border-color:var(--gold);}
+.gem-link svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:calc(100vh - 56px);}
+
+/* ── LEFT SIDEBAR ── */
+.left{
+  width:300px;flex-shrink:0;
+  background:var(--bg2);border-right:1px solid var(--border);
+  overflow-y:auto;padding:18px 16px;
+  display:flex;flex-direction:column;gap:18px;
+}
+
+/* ── SECTION TITLE ── */
+.s-title{
+  font-size:10px;font-weight:600;color:var(--gold);
+  letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--border);
+}
+
+/* ── RANDOMISE BUTTONS ── */
+.rand-btns{display:flex;flex-direction:column;gap:5px;}
+.rand-btn{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);
+  padding:9px 12px;cursor:pointer;transition:all .18s;
+}
+.rand-btn:hover{border-color:var(--gold);background:var(--gold-dim);}
+.rand-btn:active{transform:scale(0.99);}
+.rand-icon{font-size:15px;flex-shrink:0;line-height:1;width:20px;text-align:center;}
+.rand-btn-text{flex:1;min-width:0;}
+.rand-btn-label{font-family:var(--fh);font-size:12px;font-weight:600;color:var(--text);display:block;}
+.rand-btn-sub{font-size:10px;color:var(--text3);display:block;margin-top:1px;}
+
+/* ── FORM FIELDS ── */
+.field{margin-bottom:8px;}
+.field label{display:block;font-size:10px;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px;}
+input[type=text],select{
+  width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);
+  color:var(--text);font-family:var(--fb);font-size:12px;padding:7px 10px;outline:none;
+  transition:border-color .2s;
+}
+input:focus,select:focus{border-color:var(--gold);}
+select option{background:var(--bg2);}
+
+/* ── CHEMICAL PILLS ── */
+.pills{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px;}
+.pill{
+  background:var(--bg3);border:1px solid var(--border2);border-radius:20px;
+  color:var(--text3);font-size:10px;padding:2px 9px;cursor:pointer;transition:all .15s;
+}
+.pill:hover,.pill.on{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+
+/* ── GENERATE BUTTON ── */
+.btn-generate{
+  background:var(--gold);color:#1a1200;
+  font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:.03em;
+  padding:12px;border:none;border-radius:var(--r);cursor:pointer;width:100%;
+  transition:all .2s;
+}
+.btn-generate:hover{background:var(--gold2);}
+.btn-generate:active{transform:scale(0.99);}
+
+/* ── RIGHT PANEL ── */
+.right{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px;}
+
+/* ── EMPTY STATE ── */
+.empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:14px;color:var(--text3);padding:40px;
+}
+.empty-seal{width:64px;height:64px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center;}
+.empty h2{font-family:var(--fh);font-size:20px;color:var(--gold2);font-weight:600;}
+.empty p{font-size:13px;max-width:420px;line-height:1.75;}
+.steps{display:flex;flex-direction:column;gap:8px;margin-top:6px;text-align:left;max-width:360px;}
+.step{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text3);}
+.step-num{width:20px;height:20px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--fh);color:var(--gold);background:var(--gold-dim);flex-shrink:0;margin-top:1px;}
+
+/* ── SESSION CARD ── */
+.session-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);overflow:hidden;animation:fi .25s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.sc-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sc-title{font-family:var(--fh);font-size:16px;color:var(--gold2);font-weight:600;}
+.sc-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.sc-body{padding:18px 20px;display:flex;flex-direction:column;gap:16px;}
+.sc-sec-title{font-size:10px;font-weight:600;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+
+/* ── LOC CHIPS ── */
+.loc-row{display:flex;gap:8px;flex-wrap:wrap;}
+.loc-chip{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:5px 11px;font-size:12px;color:var(--text2);}
+.loc-chip span{font-size:10px;color:var(--text3);display:block;margin-bottom:1px;}
+
+/* ── CHEM BOX ── */
+.chem-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;}
+.chem-name{font-family:var(--fh);font-size:15px;color:var(--gold2);margin-bottom:8px;}
+.chem-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.chem-item{background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:6px 9px;}
+.chem-item-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+.chem-item-val{font-size:11px;color:var(--text2);font-family:var(--fm);}
+.chem-known{display:inline-flex;align-items:center;gap:5px;font-size:9px;padding:2px 8px;border-radius:20px;margin-top:8px;background:var(--gd);border:1px solid var(--gb);color:var(--green);}
+.chem-unknown{display:inline-flex;align-items:center;gap:5px;font-size:9px;padding:2px 8px;border-radius:20px;margin-top:8px;background:var(--bg4);border:1px solid var(--border2);color:var(--text3);}
+
+/* ── PANEL GRID ── */
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.panel-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px 11px;display:flex;align-items:center;gap:9px;}
+.panel-card.reporter{border-color:var(--ab);background:var(--ad);}
+.av{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--fh);background:var(--bd);border:1px solid var(--bb);color:var(--blue);}
+.av.reporter{background:var(--ad);border-color:var(--ab);color:var(--amber);}
+.panel-info{min-width:0;}
+.panel-name{font-size:11px;font-family:var(--fh);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.panel-role{font-size:9px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+
+/* ── COPY BLOCK ── */
+.copy-section{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rl);overflow:hidden;}
+.copy-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--gold-dim);}
+.copy-title{font-family:var(--fh);font-size:13px;color:var(--gold2);}
+.copy-sub{font-size:10px;color:var(--text3);margin-top:1px;}
+.btn-copy{background:var(--gold);color:#1a1200;border:none;border-radius:var(--r);font-family:var(--fh);font-size:11px;font-weight:700;padding:5px 14px;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.btn-copy:hover{background:var(--gold2);}
+.btn-copy.copied{background:var(--green);color:#fff;}
+.copy-body{padding:14px 16px;}
+.copy-text{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;font-size:11px;font-family:var(--fm);color:var(--text2);line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto;cursor:text;}
+.copy-instructions{margin-top:12px;}
+.inst-step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2);}
+.inst-step:last-child{border-bottom:none;}
+.inst-num{width:20px;height:20px;border-radius:50%;background:var(--gold-dim2);border:1px solid var(--border3);color:var(--gold);font-size:10px;font-family:var(--fh);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.inst-step a{color:var(--gold2);text-decoration:underline;text-underline-offset:2px;}
+.inst-step a:hover{color:var(--gold3);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="seal">
+      <svg width="18" height="18" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="8" stroke="#c8a44a" stroke-width="1" fill="none" opacity=".7"/>
+        <text x="10" y="14" text-anchor="middle" font-size="10" fill="#c8a44a" font-family="Georgia,serif">⚖</text>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-title">LEPC Session Launcher</div>
+      <div class="brand-sub">Gemini Gem Handoff Tool</div>
+    </div>
+  </div>
+  <a class="gem-link" href="https://gemini.google.com/gem/1CsLaR6jD1NINQExjZtUcXWGuDrL0_F-m" target="_blank">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    Open Gemini Gems →
+  </a>
+</div>
+
+<div class="layout">
+
+  <!-- ── LEFT SIDEBAR ── -->
+  <div class="left">
+
+    <!-- RANDOMISE -->
+    <div>
+      <div class="s-title">Randomise</div>
+      <div class="rand-btns">
+        <div class="rand-btn" onclick="randAll()">
+          <span class="rand-icon">🎲</span>
+          <div class="rand-btn-text">
+            <span class="rand-btn-label">Randomise All</span>
+            <span class="rand-btn-sub">Location · Chemical</span>
+          </div>
+        </div>
+        <div class="rand-btn" onclick="randLocation()">
+          <span class="rand-icon">📍</span>
+          <div class="rand-btn-text">
+            <span class="rand-btn-label">Randomise Location</span>
+            <span class="rand-btn-sub">Keep chemical</span>
+          </div>
+        </div>
+        <div class="rand-btn" onclick="randChemical()">
+          <span class="rand-icon">⚗️</span>
+          <div class="rand-btn-text">
+            <span class="rand-btn-label">Randomise Chemical</span>
+            <span class="rand-btn-sub">Keep location</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCATION -->
+    <div>
+      <div class="s-title">Location</div>
+      <div class="field"><label>City</label><input type="text" id="city" value="Littleton"/></div>
+      <div class="field"><label>County</label><input type="text" id="county" value="Winston County"/></div>
+      <div class="field">
+        <label>State</label>
+        <select id="state">
+          <option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option>
+          <option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option>
+          <option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option>
+          <option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option>
+          <option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option>
+          <option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option>
+          <option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option>
+          <option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option>
+          <option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option>
+          <option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option>
+          <option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option>
+          <option>Vermont</option><option>Virginia</option><option>Washington</option>
+          <option selected>West Virginia</option><option>Wisconsin</option><option>Wyoming</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- CHEMICAL -->
+    <div>
+      <div class="s-title">Chemical</div>
+      <div class="pills">
+        <div class="pill on"  onclick="setChemPill('vinyl chloride',this)">Vinyl chloride</div>
+        <div class="pill"     onclick="setChemPill('ammonia',this)">Ammonia</div>
+        <div class="pill"     onclick="setChemPill('chlorine',this)">Chlorine</div>
+        <div class="pill"     onclick="setChemPill('benzene',this)">Benzene</div>
+        <div class="pill"     onclick="setChemPill('ethylene oxide',this)">Eth. oxide</div>
+        <div class="pill"     onclick="setChemPill('hydrogen fluoride',this)">HF</div>
+        <div class="pill"     onclick="setChemPill('formaldehyde',this)">Formaldehyde</div>
+        <div class="pill"     onclick="setChemPill('butadiene',this)">Butadiene</div>
+      </div>
+      <input type="text" id="chemical" value="vinyl chloride" oninput="syncPills()"/>
+    </div>
+
+    <!-- GENERATE -->
+    <button class="btn-generate" id="gen-btn" onclick="generateSession()">⚡ Generate Session</button>
+
+    <!-- STATUS + OPEN GEM -->
+    <div id="jb-status" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div id="jb-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .4s;"></div>
+        <div style="min-width:0;flex:1;">
+          <div id="jb-label" style="font-size:11px;font-family:var(--fh);color:var(--text2);">Pushing session…</div>
+          <div id="jb-sub" style="font-size:10px;color:var(--text3);margin-top:1px;line-height:1.4;"></div>
+        </div>
+      </div>
+      <button id="open-gem-btn" onclick="openGem()" style="display:none;margin-top:10px;width:100%;background:var(--gold);color:#1a1200;font-family:var(--fh);font-weight:700;font-size:12px;padding:9px;border:none;border-radius:var(--r);cursor:pointer;transition:all .2s;">
+        Open Gem → Paste &amp; Press Enter
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right">
+
+    <div class="empty" id="empty-state">
+      <div class="empty-seal">
+        <svg width="28" height="28" viewBox="0 0 28 28">
+          <circle cx="14" cy="14" r="11" stroke="#c8a44a" stroke-width="1" fill="none" opacity=".6"/>
+          <text x="14" y="19" text-anchor="middle" font-size="14" fill="#c8a44a" font-family="Georgia,serif">⚖</text>
+        </svg>
+      </div>
+      <h2>LEPC Session Launcher</h2>
+      <p>Randomise or configure your location &amp; chemical, generate your session, then open the Gem and paste — your simulation starts instantly.</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><span>Hit <strong>Randomise All</strong> — or set your own location &amp; chemical</span></div>
+        <div class="step"><div class="step-num">2</div><span>Click <strong>Generate Session</strong> — panel number drawn, members revealed instantly</span></div>
+        <div class="step"><div class="step-num">3</div><span>Config (with panel members) auto-copies to clipboard</span></div>
+        <div class="step"><div class="step-num">4</div><span>Open the Gem, paste config, press Enter — simulation begins</span></div>
+      </div>
+    </div>
+
+    <div id="session-output" style="display:none;flex-direction:column;gap:16px;">
+
+      <div class="session-card" id="session-card">
+        <div class="sc-header">
+          <div>
+            <div class="sc-title" id="sc-title">—</div>
+            <div class="sc-sub"  id="sc-sub">—</div>
+          </div>
+        </div>
+        <div class="sc-body">
+          <div>
+            <div class="sc-sec-title">Location</div>
+            <div class="loc-row" id="loc-row"></div>
+          </div>
+          <div>
+            <div class="sc-sec-title">Chemical</div>
+            <div class="chem-box" id="chem-box"></div>
+          </div>
+          <div>
+            <div class="sc-sec-title">Panel Assignment</div>
+            <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:10px;" id="panel-members-display">
+              <div style="font-size:11px;color:var(--text3);font-style:italic;padding:6px;">Generate a session to see panel members</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="copy-section">
+        <div class="copy-header">
+          <div>
+            <div class="copy-title">Session Config — paste into Gemini Gem</div>
+            <div class="copy-sub">Paste as the very first message in your LEPC Gem conversation</div>
+          </div>
+          <button class="btn-copy" id="copy-btn" onclick="copyConfig()">Copy</button>
+        </div>
+        <div class="copy-body">
+          <div class="copy-text" id="copy-text"></div>
+          <div class="copy-instructions">
+            <div class="inst-step"><div class="inst-num">1</div><span>Config is <strong>auto-copied to clipboard</strong> when you click Generate Session</span></div>
+            <div class="inst-step"><div class="inst-num">2</div><span>Your <strong>Panel Members</strong> are shown above — they are automatically included in the config</span></div>
+            <div class="inst-step"><div class="inst-num">3</div><span>Click <strong>Open Gem</strong> above — the <a href="https://gemini.google.com/gem/1CsLaR6jD1NINQExjZtUcXWGuDrL0_F-m" target="_blank">LEPC Town Hall Gem</a> opens in a new tab</span></div>
+            <div class="inst-step"><div class="inst-num">4</div><span>Paste (Ctrl+V / Cmd+V) and press <strong>Enter</strong> — the Gem looks up your panel and begins introductions</span></div>
+            <div class="inst-step"><div class="inst-num">5</div><span>Upload your project plan PDF when prompted, then type <strong>"Final Review"</strong> to score</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+const TOTAL_PANELS = 582; // total entries in LEPC All Panels PDF
+
+// ─────────────────────────────────────────────
+// PANEL LOOKUP MAP  (0-indexed array, panel N = PANEL_MAP[N-1])
+// Buffy Aldix always present, not listed here.
+// Keys: CT TM SL JJ MS JC BQ NH KH PT
+// ─────────────────────────────────────────────
+const CHAR_NAMES = {
+  CT:'Charles W. Tarkington III', TM:'Troy Mattingly', SL:'Sally Landeau',
+  JJ:'John Johnson', MS:'Myles Spartan, Jr.', JC:'Jerry Candor',
+  BQ:'Ted "Boomer" Querelson', NH:'Natasha Hawking', KH:'Kirby Hanson', PT:'Paul Temblor',
+};
+const CHAR_ROLES = {
+  CT:'President, Big Nasty Chemicals', TM:'Fire Chief & LEPC Chair',
+  SL:'Parent, Roosevelt Franklin Elementary', JJ:'Chamber of Commerce President',
+  MS:'General Counsel, Winston County', JC:'Environmental Activist',
+  BQ:'GM, ABC Fireworks', NH:'Water Resources Analyst',
+  KH:'HOA Trustee, Waterview Estates', PT:'Union Organizer, IBHCW',
+};
+
+// All 582 panels — 3-person (1-120), 4-person (121-330), 5-person (331-582)
+const PANEL_MAP = [
+  // 3-person panels (1-120)
+  ['CT','TM','SL'],['CT','TM','JJ'],['CT','TM','MS'],['CT','TM','JC'],['CT','TM','BQ'],
+  ['CT','TM','NH'],['CT','TM','KH'],['CT','TM','PT'],['CT','SL','JJ'],['CT','SL','MS'],
+  ['CT','SL','JC'],['CT','SL','BQ'],['CT','SL','NH'],['CT','SL','KH'],['CT','SL','PT'],
+  ['CT','JJ','MS'],['CT','JJ','JC'],['CT','JJ','BQ'],['CT','JJ','NH'],['CT','JJ','KH'],
+  ['CT','JJ','PT'],['CT','MS','JC'],['CT','MS','BQ'],['CT','MS','NH'],['CT','MS','KH'],
+  ['CT','MS','PT'],['CT','JC','BQ'],['CT','JC','NH'],['CT','JC','KH'],['CT','JC','PT'],
+  ['CT','BQ','NH'],['CT','BQ','KH'],['CT','BQ','PT'],['CT','NH','KH'],['CT','NH','PT'],
+  ['CT','KH','PT'],['TM','SL','JJ'],['TM','SL','MS'],['TM','SL','JC'],['TM','SL','BQ'],
+  ['TM','SL','NH'],['TM','SL','KH'],['TM','SL','PT'],['TM','JJ','MS'],['TM','JJ','JC'],
+  ['TM','JJ','BQ'],['TM','JJ','NH'],['TM','JJ','KH'],['TM','JJ','PT'],['TM','MS','JC'],
+  ['TM','MS','BQ'],['TM','MS','NH'],['TM','MS','KH'],['TM','MS','PT'],['TM','JC','BQ'],
+  ['TM','JC','NH'],['TM','JC','KH'],['TM','JC','PT'],['TM','BQ','NH'],['TM','BQ','KH'],
+  ['TM','BQ','PT'],['TM','NH','KH'],['TM','NH','PT'],['TM','KH','PT'],['SL','JJ','MS'],
+  ['SL','JJ','JC'],['SL','JJ','BQ'],['SL','JJ','NH'],['SL','JJ','KH'],['SL','JJ','PT'],
+  ['SL','MS','JC'],['SL','MS','BQ'],['SL','MS','NH'],['SL','MS','KH'],['SL','MS','PT'],
+  ['SL','JC','BQ'],['SL','JC','NH'],['SL','JC','KH'],['SL','JC','PT'],['SL','BQ','NH'],
+  ['SL','BQ','KH'],['SL','BQ','PT'],['SL','NH','KH'],['SL','NH','PT'],['SL','KH','PT'],
+  ['JJ','MS','JC'],['JJ','MS','BQ'],['JJ','MS','NH'],['JJ','MS','KH'],['JJ','MS','PT'],
+  ['JJ','JC','BQ'],['JJ','JC','NH'],['JJ','JC','KH'],['JJ','JC','PT'],['JJ','BQ','NH'],
+  ['JJ','BQ','KH'],['JJ','BQ','PT'],['JJ','NH','KH'],['JJ','NH','PT'],['JJ','KH','PT'],
+  ['MS','JC','BQ'],['MS','JC','NH'],['MS','JC','KH'],['MS','JC','PT'],['MS','BQ','NH'],
+  ['MS','BQ','KH'],['MS','BQ','PT'],['MS','NH','KH'],['MS','NH','PT'],['MS','KH','PT'],
+  ['JC','BQ','NH'],['JC','BQ','KH'],['JC','BQ','PT'],['JC','NH','KH'],['JC','NH','PT'],
+  ['JC','KH','PT'],['BQ','NH','KH'],['BQ','NH','PT'],['BQ','KH','PT'],['NH','KH','PT'],
+  // 4-person panels (121-330)
+  ['CT','TM','SL','JJ'],['CT','TM','SL','MS'],['CT','TM','SL','JC'],['CT','TM','SL','BQ'],
+  ['CT','TM','SL','NH'],['CT','TM','SL','KH'],['CT','TM','SL','PT'],['CT','TM','JJ','MS'],
+  ['CT','TM','JJ','JC'],['CT','TM','JJ','BQ'],['CT','TM','JJ','NH'],['CT','TM','JJ','KH'],
+  ['CT','TM','JJ','PT'],['CT','TM','MS','JC'],['CT','TM','MS','BQ'],['CT','TM','MS','NH'],
+  ['CT','TM','MS','KH'],['CT','TM','MS','PT'],['CT','TM','JC','BQ'],['CT','TM','JC','NH'],
+  ['CT','TM','JC','KH'],['CT','TM','JC','PT'],['CT','TM','BQ','NH'],['CT','TM','BQ','KH'],
+  ['CT','TM','BQ','PT'],['CT','TM','NH','KH'],['CT','TM','NH','PT'],['CT','TM','KH','PT'],
+  ['CT','SL','JJ','MS'],['CT','SL','JJ','JC'],['CT','SL','JJ','BQ'],['CT','SL','JJ','NH'],
+  ['CT','SL','JJ','KH'],['CT','SL','JJ','PT'],['CT','SL','MS','JC'],['CT','SL','MS','BQ'],
+  ['CT','SL','MS','NH'],['CT','SL','MS','KH'],['CT','SL','MS','PT'],['CT','SL','JC','BQ'],
+  ['CT','SL','JC','NH'],['CT','SL','JC','KH'],['CT','SL','JC','PT'],['CT','SL','BQ','NH'],
+  ['CT','SL','BQ','KH'],['CT','SL','BQ','PT'],['CT','SL','NH','KH'],['CT','SL','NH','PT'],
+  ['CT','SL','KH','PT'],['CT','JJ','MS','JC'],['CT','JJ','MS','BQ'],['CT','JJ','MS','NH'],
+  ['CT','JJ','MS','KH'],['CT','JJ','MS','PT'],['CT','JJ','JC','BQ'],['CT','JJ','JC','NH'],
+  ['CT','JJ','JC','KH'],['CT','JJ','JC','PT'],['CT','JJ','BQ','NH'],['CT','JJ','BQ','KH'],
+  ['CT','JJ','BQ','PT'],['CT','JJ','NH','KH'],['CT','JJ','NH','PT'],['CT','JJ','KH','PT'],
+  ['CT','MS','JC','BQ'],['CT','MS','JC','NH'],['CT','MS','JC','KH'],['CT','MS','JC','PT'],
+  ['CT','MS','BQ','NH'],['CT','MS','BQ','KH'],['CT','MS','BQ','PT'],['CT','MS','NH','KH'],
+  ['CT','MS','NH','PT'],['CT','MS','KH','PT'],['CT','JC','BQ','NH'],['CT','JC','BQ','KH'],
+  ['CT','JC','BQ','PT'],['CT','JC','NH','KH'],['CT','JC','NH','PT'],['CT','JC','KH','PT'],
+  ['CT','BQ','NH','KH'],['CT','BQ','NH','PT'],['CT','BQ','KH','PT'],['CT','NH','KH','PT'],
+  ['TM','SL','JJ','MS'],['TM','SL','JJ','JC'],['TM','SL','JJ','BQ'],['TM','SL','JJ','NH'],
+  ['TM','SL','JJ','KH'],['TM','SL','JJ','PT'],['TM','SL','MS','JC'],['TM','SL','MS','BQ'],
+  ['TM','SL','MS','NH'],['TM','SL','MS','KH'],['TM','SL','MS','PT'],['TM','SL','JC','BQ'],
+  ['TM','SL','JC','NH'],['TM','SL','JC','KH'],['TM','SL','JC','PT'],['TM','SL','BQ','NH'],
+  ['TM','SL','BQ','KH'],['TM','SL','BQ','PT'],['TM','SL','NH','KH'],['TM','SL','NH','PT'],
+  ['TM','SL','KH','PT'],['TM','JJ','MS','JC'],['TM','JJ','MS','BQ'],['TM','JJ','MS','NH'],
+  ['TM','JJ','MS','KH'],['TM','JJ','MS','PT'],['TM','JJ','JC','BQ'],['TM','JJ','JC','NH'],
+  ['TM','JJ','JC','KH'],['TM','JJ','JC','PT'],['TM','JJ','BQ','NH'],['TM','JJ','BQ','KH'],
+  ['TM','JJ','BQ','PT'],['TM','JJ','NH','KH'],['TM','JJ','NH','PT'],['TM','JJ','KH','PT'],
+  ['TM','MS','JC','BQ'],['TM','MS','JC','NH'],['TM','MS','JC','KH'],['TM','MS','JC','PT'],
+  ['TM','MS','BQ','NH'],['TM','MS','BQ','KH'],['TM','MS','BQ','PT'],['TM','MS','NH','KH'],
+  ['TM','MS','NH','PT'],['TM','MS','KH','PT'],['TM','JC','BQ','NH'],['TM','JC','BQ','KH'],
+  ['TM','JC','BQ','PT'],['TM','JC','NH','KH'],['TM','JC','NH','PT'],['TM','JC','KH','PT'],
+  ['TM','BQ','NH','KH'],['TM','BQ','NH','PT'],['TM','BQ','KH','PT'],['TM','NH','KH','PT'],
+  ['SL','JJ','MS','JC'],['SL','JJ','MS','BQ'],['SL','JJ','MS','NH'],['SL','JJ','MS','KH'],
+  ['SL','JJ','MS','PT'],['SL','JJ','JC','BQ'],['SL','JJ','JC','NH'],['SL','JJ','JC','KH'],
+  ['SL','JJ','JC','PT'],['SL','JJ','BQ','NH'],['SL','JJ','BQ','KH'],['SL','JJ','BQ','PT'],
+  ['SL','JJ','NH','KH'],['SL','JJ','NH','PT'],['SL','JJ','KH','PT'],['SL','MS','JC','BQ'],
+  ['SL','MS','JC','NH'],['SL','MS','JC','KH'],['SL','MS','JC','PT'],['SL','MS','BQ','NH'],
+  ['SL','MS','BQ','KH'],['SL','MS','BQ','PT'],['SL','MS','NH','KH'],['SL','MS','NH','PT'],
+  ['SL','MS','KH','PT'],['SL','JC','BQ','NH'],['SL','JC','BQ','KH'],['SL','JC','BQ','PT'],
+  ['SL','JC','NH','KH'],['SL','JC','NH','PT'],['SL','JC','KH','PT'],['SL','BQ','NH','KH'],
+  ['SL','BQ','NH','PT'],['SL','BQ','KH','PT'],['SL','NH','KH','PT'],['JJ','MS','JC','BQ'],
+  ['JJ','MS','JC','NH'],['JJ','MS','JC','KH'],['JJ','MS','JC','PT'],['JJ','MS','BQ','NH'],
+  ['JJ','MS','BQ','KH'],['JJ','MS','BQ','PT'],['JJ','MS','NH','KH'],['JJ','MS','NH','PT'],
+  ['JJ','MS','KH','PT'],['JJ','JC','BQ','NH'],['JJ','JC','BQ','KH'],['JJ','JC','BQ','PT'],
+  ['JJ','JC','NH','KH'],['JJ','JC','NH','PT'],['JJ','JC','KH','PT'],['JJ','BQ','NH','KH'],
+  ['JJ','BQ','NH','PT'],['JJ','BQ','KH','PT'],['JJ','NH','KH','PT'],['MS','JC','BQ','NH'],
+  ['MS','JC','BQ','KH'],['MS','JC','BQ','PT'],['MS','JC','NH','KH'],['MS','JC','NH','PT'],
+  ['MS','JC','KH','PT'],['MS','BQ','NH','KH'],['MS','BQ','NH','PT'],['MS','BQ','KH','PT'],
+  ['MS','NH','KH','PT'],['JC','BQ','NH','KH'],['JC','BQ','NH','PT'],['JC','BQ','KH','PT'],
+  ['JC','NH','KH','PT'],['BQ','NH','KH','PT'],
+  // 5-person panels (331-582)
+  ['CT','TM','SL','JJ','MS'],['CT','TM','SL','JJ','JC'],['CT','TM','SL','JJ','BQ'],
+  ['CT','TM','SL','JJ','NH'],['CT','TM','SL','JJ','KH'],['CT','TM','SL','JJ','PT'],
+  ['CT','TM','SL','MS','JC'],['CT','TM','SL','MS','BQ'],['CT','TM','SL','MS','NH'],
+  ['CT','TM','SL','MS','KH'],['CT','TM','SL','MS','PT'],['CT','TM','SL','JC','BQ'],
+  ['CT','TM','SL','JC','NH'],['CT','TM','SL','JC','KH'],['CT','TM','SL','JC','PT'],
+  ['CT','TM','SL','BQ','NH'],['CT','TM','SL','BQ','KH'],['CT','TM','SL','BQ','PT'],
+  ['CT','TM','SL','NH','KH'],['CT','TM','SL','NH','PT'],['CT','TM','SL','KH','PT'],
+  ['CT','TM','JJ','MS','JC'],['CT','TM','JJ','MS','BQ'],['CT','TM','JJ','MS','NH'],
+  ['CT','TM','JJ','MS','KH'],['CT','TM','JJ','MS','PT'],['CT','TM','JJ','JC','BQ'],
+  ['CT','TM','JJ','JC','NH'],['CT','TM','JJ','JC','KH'],['CT','TM','JJ','JC','PT'],
+  ['CT','TM','JJ','BQ','NH'],['CT','TM','JJ','BQ','KH'],['CT','TM','JJ','BQ','PT'],
+  ['CT','TM','JJ','NH','KH'],['CT','TM','JJ','NH','PT'],['CT','TM','JJ','KH','PT'],
+  ['CT','TM','MS','JC','BQ'],['CT','TM','MS','JC','NH'],['CT','TM','MS','JC','KH'],
+  ['CT','TM','MS','JC','PT'],['CT','TM','MS','BQ','NH'],['CT','TM','MS','BQ','KH'],
+  ['CT','TM','MS','BQ','PT'],['CT','TM','MS','NH','KH'],['CT','TM','MS','NH','PT'],
+  ['CT','TM','MS','KH','PT'],['CT','TM','JC','BQ','NH'],['CT','TM','JC','BQ','KH'],
+  ['CT','TM','JC','BQ','PT'],['CT','TM','JC','NH','KH'],['CT','TM','JC','NH','PT'],
+  ['CT','TM','JC','KH','PT'],['CT','TM','BQ','NH','KH'],['CT','TM','BQ','NH','PT'],
+  ['CT','TM','BQ','KH','PT'],['CT','TM','NH','KH','PT'],['CT','SL','JJ','MS','JC'],
+  ['CT','SL','JJ','MS','BQ'],['CT','SL','JJ','MS','NH'],['CT','SL','JJ','MS','KH'],
+  ['CT','SL','JJ','MS','PT'],['CT','SL','JJ','JC','BQ'],['CT','SL','JJ','JC','NH'],
+  ['CT','SL','JJ','JC','KH'],['CT','SL','JJ','JC','PT'],['CT','SL','JJ','BQ','NH'],
+  ['CT','SL','JJ','BQ','KH'],['CT','SL','JJ','BQ','PT'],['CT','SL','JJ','NH','KH'],
+  ['CT','SL','JJ','NH','PT'],['CT','SL','JJ','KH','PT'],['CT','SL','MS','JC','BQ'],
+  ['CT','SL','MS','JC','NH'],['CT','SL','MS','JC','KH'],['CT','SL','MS','JC','PT'],
+  ['CT','SL','MS','BQ','NH'],['CT','SL','MS','BQ','KH'],['CT','SL','MS','BQ','PT'],
+  ['CT','SL','MS','NH','KH'],['CT','SL','MS','NH','PT'],['CT','SL','MS','KH','PT'],
+  ['CT','SL','JC','BQ','NH'],['CT','SL','JC','BQ','KH'],['CT','SL','JC','BQ','PT'],
+  ['CT','SL','JC','NH','KH'],['CT','SL','JC','NH','PT'],['CT','SL','JC','KH','PT'],
+  ['CT','SL','BQ','NH','KH'],['CT','SL','BQ','NH','PT'],['CT','SL','BQ','KH','PT'],
+  ['CT','SL','NH','KH','PT'],['CT','JJ','MS','JC','BQ'],['CT','JJ','MS','JC','NH'],
+  ['CT','JJ','MS','JC','KH'],['CT','JJ','MS','JC','PT'],['CT','JJ','MS','BQ','NH'],
+  ['CT','JJ','MS','BQ','KH'],['CT','JJ','MS','BQ','PT'],['CT','JJ','MS','NH','KH'],
+  ['CT','JJ','MS','NH','PT'],['CT','JJ','MS','KH','PT'],['CT','JJ','JC','BQ','NH'],
+  ['CT','JJ','JC','BQ','KH'],['CT','JJ','JC','BQ','PT'],['CT','JJ','JC','NH','KH'],
+  ['CT','JJ','JC','NH','PT'],['CT','JJ','JC','KH','PT'],['CT','JJ','BQ','NH','KH'],
+  ['CT','JJ','BQ','NH','PT'],['CT','JJ','BQ','KH','PT'],['CT','JJ','NH','KH','PT'],
+  ['CT','MS','JC','BQ','NH'],['CT','MS','JC','BQ','KH'],['CT','MS','JC','BQ','PT'],
+  ['CT','MS','JC','NH','KH'],['CT','MS','JC','NH','PT'],['CT','MS','JC','KH','PT'],
+  ['CT','MS','BQ','NH','KH'],['CT','MS','BQ','NH','PT'],['CT','MS','BQ','KH','PT'],
+  ['CT','MS','NH','KH','PT'],['CT','JC','BQ','NH','KH'],['CT','JC','BQ','NH','PT'],
+  ['CT','JC','BQ','KH','PT'],['CT','JC','NH','KH','PT'],['CT','BQ','NH','KH','PT'],
+  ['TM','SL','JJ','MS','JC'],['TM','SL','JJ','MS','BQ'],['TM','SL','JJ','MS','NH'],
+  ['TM','SL','JJ','MS','KH'],['TM','SL','JJ','MS','PT'],['TM','SL','JJ','JC','BQ'],
+  ['TM','SL','JJ','JC','NH'],['TM','SL','JJ','JC','KH'],['TM','SL','JJ','JC','PT'],
+  ['TM','SL','JJ','BQ','NH'],['TM','SL','JJ','BQ','KH'],['TM','SL','JJ','BQ','PT'],
+  ['TM','SL','JJ','NH','KH'],['TM','SL','JJ','NH','PT'],['TM','SL','JJ','KH','PT'],
+  ['TM','SL','MS','JC','BQ'],['TM','SL','MS','JC','NH'],['TM','SL','MS','JC','KH'],
+  ['TM','SL','MS','JC','PT'],['TM','SL','MS','BQ','NH'],['TM','SL','MS','BQ','KH'],
+  ['TM','SL','MS','BQ','PT'],['TM','SL','MS','NH','KH'],['TM','SL','MS','NH','PT'],
+  ['TM','SL','MS','KH','PT'],['TM','SL','JC','BQ','NH'],['TM','SL','JC','BQ','KH'],
+  ['TM','SL','JC','BQ','PT'],['TM','SL','JC','NH','KH'],['TM','SL','JC','NH','PT'],
+  ['TM','SL','JC','KH','PT'],['TM','SL','BQ','NH','KH'],['TM','SL','BQ','NH','PT'],
+  ['TM','SL','BQ','KH','PT'],['TM','SL','NH','KH','PT'],['TM','JJ','MS','JC','BQ'],
+  ['TM','JJ','MS','JC','NH'],['TM','JJ','MS','JC','KH'],['TM','JJ','MS','JC','PT'],
+  ['TM','JJ','MS','BQ','NH'],['TM','JJ','MS','BQ','KH'],['TM','JJ','MS','BQ','PT'],
+  ['TM','JJ','MS','NH','KH'],['TM','JJ','MS','NH','PT'],['TM','JJ','MS','KH','PT'],
+  ['TM','JJ','JC','BQ','NH'],['TM','JJ','JC','BQ','KH'],['TM','JJ','JC','BQ','PT'],
+  ['TM','JJ','JC','NH','KH'],['TM','JJ','JC','NH','PT'],['TM','JJ','JC','KH','PT'],
+  ['TM','JJ','BQ','NH','KH'],['TM','JJ','BQ','NH','PT'],['TM','JJ','BQ','KH','PT'],
+  ['TM','JJ','NH','KH','PT'],['TM','MS','JC','BQ','NH'],['TM','MS','JC','BQ','KH'],
+  ['TM','MS','JC','BQ','PT'],['TM','MS','JC','NH','KH'],['TM','MS','JC','NH','PT'],
+  ['TM','MS','JC','KH','PT'],['TM','MS','BQ','NH','KH'],['TM','MS','BQ','NH','PT'],
+  ['TM','MS','BQ','KH','PT'],['TM','MS','NH','KH','PT'],['TM','JC','BQ','NH','KH'],
+  ['TM','JC','BQ','NH','PT'],['TM','JC','BQ','KH','PT'],['TM','JC','NH','KH','PT'],
+  ['TM','BQ','NH','KH','PT'],['SL','JJ','MS','JC','BQ'],['SL','JJ','MS','JC','NH'],
+  ['SL','JJ','MS','JC','KH'],['SL','JJ','MS','JC','PT'],['SL','JJ','MS','BQ','NH'],
+  ['SL','JJ','MS','BQ','KH'],['SL','JJ','MS','BQ','PT'],['SL','JJ','MS','NH','KH'],
+  ['SL','JJ','MS','NH','PT'],['SL','JJ','MS','KH','PT'],['SL','JJ','JC','BQ','NH'],
+  ['SL','JJ','JC','BQ','KH'],['SL','JJ','JC','BQ','PT'],['SL','JJ','JC','NH','KH'],
+  ['SL','JJ','JC','NH','PT'],['SL','JJ','JC','KH','PT'],['SL','JJ','BQ','NH','KH'],
+  ['SL','JJ','BQ','NH','PT'],['SL','JJ','BQ','KH','PT'],['SL','JJ','NH','KH','PT'],
+  ['SL','MS','JC','BQ','NH'],['SL','MS','JC','BQ','KH'],['SL','MS','JC','BQ','PT'],
+  ['SL','MS','JC','NH','KH'],['SL','MS','JC','NH','PT'],['SL','MS','JC','KH','PT'],
+  ['SL','MS','BQ','NH','KH'],['SL','MS','BQ','NH','PT'],['SL','MS','BQ','KH','PT'],
+  ['SL','MS','NH','KH','PT'],['SL','JC','BQ','NH','KH'],['SL','JC','BQ','NH','PT'],
+  ['SL','JC','BQ','KH','PT'],['SL','JC','NH','KH','PT'],['SL','BQ','NH','KH','PT'],
+  ['JJ','MS','JC','BQ','NH'],['JJ','MS','JC','BQ','KH'],['JJ','MS','JC','BQ','PT'],
+  ['JJ','MS','JC','NH','KH'],['JJ','MS','JC','NH','PT'],['JJ','MS','JC','KH','PT'],
+  ['JJ','MS','BQ','NH','KH'],['JJ','MS','BQ','NH','PT'],['JJ','MS','BQ','KH','PT'],
+  ['JJ','MS','NH','KH','PT'],['JJ','JC','BQ','NH','KH'],['JJ','JC','BQ','NH','PT'],
+  ['JJ','JC','BQ','KH','PT'],['JJ','JC','NH','KH','PT'],['JJ','BQ','NH','KH','PT'],
+  ['MS','JC','BQ','NH','KH'],['MS','JC','BQ','NH','PT'],['MS','JC','BQ','KH','PT'],
+  ['MS','JC','NH','KH','PT'],['MS','BQ','NH','KH','PT'],['JC','BQ','NH','KH','PT'],
+];
+
+function getPanelMembers(panelNum){
+  const keys = PANEL_MAP[panelNum - 1] || [];
+  return keys.map(k => ({ key: k, name: CHAR_NAMES[k], role: CHAR_ROLES[k] }));
+}
+
+const CHEM_DATA = {
+  'vinyl chloride':   { formula:'C₂H₃Cl',  casRN:'75-01-4',   osha_pel:'1 ppm (TWA)',       acgih_tlv:'1 ppm (A1 carcinogen)',   epcra:'500 lbs',    rmp:'10,000 lbs', nfpa:'4', hazard:'Flammable gas; IDLH 3,600 ppm; known human carcinogen (IARC Group 1)' },
+  'ammonia':          { formula:'NH₃',      casRN:'7664-41-7', osha_pel:'50 ppm (TWA)',      acgih_tlv:'25 ppm (TWA)',            epcra:'500 lbs',    rmp:'10,000 lbs', nfpa:'1', hazard:'Toxic gas; IDLH 300 ppm; severe respiratory and eye irritant' },
+  'chlorine':         { formula:'Cl₂',      casRN:'7782-50-5', osha_pel:'1 ppm (ceiling)',   acgih_tlv:'0.5 ppm (TWA)',           epcra:'100 lbs',    rmp:'2,500 lbs',  nfpa:'0', hazard:'Toxic gas; IDLH 10 ppm; severe pulmonary damage at low concentrations' },
+  'benzene':          { formula:'C₆H₆',     casRN:'71-43-2',   osha_pel:'1 ppm (TWA)',       acgih_tlv:'0.5 ppm (A1 carcinogen)', epcra:'10 lbs',     rmp:'N/A',        nfpa:'3', hazard:'Flammable liquid; IDLH 500 ppm; known human carcinogen (leukemia)' },
+  'ethylene oxide':   { formula:'C₂H₄O',   casRN:'75-21-8',   osha_pel:'1 ppm (TWA)',       acgih_tlv:'1 ppm (A2 carcinogen)',   epcra:'1,000 lbs',  rmp:'10,000 lbs', nfpa:'4', hazard:'Flammable gas; IDLH 800 ppm; known human carcinogen (IARC Group 1)' },
+  'hydrogen fluoride':{ formula:'HF',       casRN:'7664-39-3', osha_pel:'3 ppm (TWA)',       acgih_tlv:'0.5 ppm (ceiling)',       epcra:'100 lbs',    rmp:'1,000 lbs',  nfpa:'0', hazard:'Extremely corrosive; IDLH 30 ppm; skin penetration causes systemic fluoride toxicity' },
+  'formaldehyde':     { formula:'CH₂O',     casRN:'50-00-0',   osha_pel:'0.75 ppm (TWA)',    acgih_tlv:'0.3 ppm (ceiling)',       epcra:'500 lbs',    rmp:'N/A',        nfpa:'2', hazard:'Flammable gas/liquid; IDLH 20 ppm; probable human carcinogen; severe sensitizer' },
+  'butadiene':        { formula:'C₄H₆',     casRN:'106-99-0',  osha_pel:'1 ppm (TWA)',       acgih_tlv:'2 ppm (A2 carcinogen)',   epcra:'10,000 lbs', rmp:'10,000 lbs', nfpa:'4', hazard:'Flammable gas; IDLH 2,000 ppm; suspected human carcinogen (leukemia/lymphoma)' },
+  'sulfur dioxide':   { formula:'SO₂',      casRN:'7446-09-5', osha_pel:'5 ppm (TWA)',       acgih_tlv:'0.25 ppm (TWA)',          epcra:'500 lbs',    rmp:'5,000 lbs',  nfpa:'0', hazard:'Toxic gas; IDLH 100 ppm; severe respiratory irritant' },
+  'methanol':         { formula:'CH₃OH',    casRN:'67-56-1',   osha_pel:'200 ppm (TWA)',     acgih_tlv:'200 ppm (TWA)',           epcra:'5,000 lbs',  rmp:'N/A',        nfpa:'3', hazard:'Flammable liquid; IDLH 6,000 ppm; CNS toxin; causes blindness' },
+  'hydrogen cyanide': { formula:'HCN',      casRN:'74-90-8',   osha_pel:'10 ppm (ceiling)',  acgih_tlv:'4.7 ppm (ceiling)',       epcra:'100 lbs',    rmp:'2,500 lbs',  nfpa:'4', hazard:'Extremely toxic; IDLH 50 ppm; rapid cellular asphyxia' },
+  'toluene':          { formula:'C₇H₈',     casRN:'108-88-3',  osha_pel:'200 ppm (TWA)',     acgih_tlv:'20 ppm (TWA)',            epcra:'1,000 lbs',  rmp:'N/A',        nfpa:'3', hazard:'Flammable liquid; IDLH 500 ppm; CNS depressant; reproductive toxin' },
+  'acrylonitrile':    { formula:'C₃H₃N',    casRN:'107-13-1',  osha_pel:'2 ppm (TWA)',       acgih_tlv:'2 ppm (A3 carcinogen)',   epcra:'10,000 lbs', rmp:'20,000 lbs', nfpa:'3', hazard:'Flammable liquid; IDLH 85 ppm; suspected human carcinogen; forms HCN on combustion' },
+  'styrene':          { formula:'C₈H₈',     casRN:'100-42-5',  osha_pel:'100 ppm (TWA)',     acgih_tlv:'20 ppm (TWA)',            epcra:'1,000 lbs',  rmp:'N/A',        nfpa:'3', hazard:'Flammable liquid; IDLH 700 ppm; CNS effects; possible carcinogen' },
+  'propylene oxide':  { formula:'C₃H₆O',    casRN:'75-56-9',   osha_pel:'100 ppm (TWA)',     acgih_tlv:'2 ppm (A3 carcinogen)',   epcra:'10,000 lbs', rmp:'10,000 lbs', nfpa:'4', hazard:'Highly flammable; IDLH 400 ppm; possible carcinogen; eye/skin/lung irritant' },
+  'acetaldehyde':     { formula:'C₂H₄O',    casRN:'75-07-0',   osha_pel:'200 ppm (TWA)',     acgih_tlv:'25 ppm (ceiling)',        epcra:'1,000 lbs',  rmp:'N/A',        nfpa:'4', hazard:'Highly flammable; IDLH 2,000 ppm; probable carcinogen; intense irritant' },
+};
+
+const LOCATIONS = [
+  {city:'Millbrook',county:'Elmore County',state:'Alabama'},
+  {city:'Safford',county:'Graham County',state:'Arizona'},
+  {city:'Crossett',county:'Ashley County',state:'Arkansas'},
+  {city:'Coalinga',county:'Fresno County',state:'California'},
+  {city:'Pueblo',county:'Pueblo County',state:'Colorado'},
+  {city:'Seaford',county:'Sussex County',state:'Delaware'},
+  {city:'Palatka',county:'Putnam County',state:'Florida'},
+  {city:'Bainbridge',county:'Decatur County',state:'Georgia'},
+  {city:'Kankakee',county:'Kankakee County',state:'Illinois'},
+  {city:'Logansport',county:'Cass County',state:'Indiana'},
+  {city:'Ottumwa',county:'Wapello County',state:'Iowa'},
+  {city:'Parsons',county:'Labette County',state:'Kansas'},
+  {city:'Middlesborough',county:'Bell County',state:'Kentucky'},
+  {city:'Bogalusa',county:'Washington Parish',state:'Louisiana'},
+  {city:'Cumberland',county:'Allegany County',state:'Maryland'},
+  {city:'Cadillac',county:'Wexford County',state:'Michigan'},
+  {city:'Hibbing',county:'St. Louis County',state:'Minnesota'},
+  {city:'Natchez',county:'Adams County',state:'Mississippi'},
+  {city:'Sedalia',county:'Pettis County',state:'Missouri'},
+  {city:'Havre',county:'Hill County',state:'Montana'},
+  {city:'Elko',county:'Elko County',state:'Nevada'},
+  {city:'Vineland',county:'Cumberland County',state:'New Jersey'},
+  {city:'Olean',county:'Cattaraugus County',state:'New York'},
+  {city:'Sanford',county:'Lee County',state:'North Carolina'},
+  {city:'Zanesville',county:'Muskingum County',state:'Ohio'},
+  {city:'Enid',county:'Garfield County',state:'Oklahoma'},
+  {city:'Sunbury',county:'Northumberland County',state:'Pennsylvania'},
+  {city:'Orangeburg',county:'Orangeburg County',state:'South Carolina'},
+  {city:'Cookeville',county:'Putnam County',state:'Tennessee'},
+  {city:'Lufkin',county:'Angelina County',state:'Texas'},
+  {city:'Rutland',county:'Rutland County',state:'Vermont'},
+  {city:'Martinsville',county:'Henry County',state:'Virginia'},
+  {city:'Aberdeen',county:'Grays Harbor County',state:'Washington'},
+  {city:'Clarksburg',county:'Harrison County',state:'West Virginia'},
+  {city:'Sheboygan',county:'Sheboygan County',state:'Wisconsin'},
+];
+
+const PAPERS = ['Courier','Gazette','Tribune','Herald','Record','Dispatch','Observer','Register','Chronicle','Bulletin'];
+
+// ─────────────────────────────────────────────
+// CRYPTO RANDOM UTILS
+// ─────────────────────────────────────────────
+function ri(max){ const a=new Uint32Array(1); crypto.getRandomValues(a); return a[0]%max; }
+function pick(arr){ return arr[ri(arr.length)]; }
+
+function drawPanelNumber(){
+  // Returns a number 1–582, each with equal probability
+  return ri(TOTAL_PANELS) + 1;
+}
+
+// ─────────────────────────────────────────────
+// RANDOMISE BUTTONS — only update fields, never render output
+// ─────────────────────────────────────────────
+function randAll(){
+  setLocation(pick(LOCATIONS));
+  setChem(Object.keys(CHEM_DATA)[ri(Object.keys(CHEM_DATA).length)]);
+}
+
+function randLocation(){
+  setLocation(pick(LOCATIONS));
+}
+
+function randChemical(){
+  setChem(Object.keys(CHEM_DATA)[ri(Object.keys(CHEM_DATA).length)]);
+}
+
+function setLocation(loc){
+  document.getElementById('city').value   = loc.city;
+  document.getElementById('county').value = loc.county;
+  const sel = document.getElementById('state');
+  for(let i=0;i<sel.options.length;i++){
+    if(sel.options[i].text === loc.state){ sel.selectedIndex = i; break; }
+  }
+}
+
+function setChem(name){
+  document.getElementById('chemical').value = name;
+  syncPills();
+}
+
+function syncPills(){
+  const v = document.getElementById('chemical').value.trim().toLowerCase();
+  document.querySelectorAll('.pill').forEach(p =>
+    p.classList.toggle('on', p.textContent.trim().toLowerCase() === v));
+}
+
+function setChemPill(name, el){
+  document.getElementById('chemical').value = name;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ─────────────────────────────────────────────
+// JSONBIN CONFIG
+// ─────────────────────────────────────────────
+const WORKER_URL = 'https://lepc-panel.kp3177.workers.dev';
+
+// ─────────────────────────────────────────────
+// GENERATE SESSION — sole trigger for all output
+// ─────────────────────────────────────────────
+async function generateSession(){
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+
+  document.getElementById('open-gem-btn').style.display = 'none';
+
+  const city     = document.getElementById('city').value.trim()     || 'Littleton';
+  const county   = document.getElementById('county').value.trim()   || 'Winston County';
+  const state    = document.getElementById('state').value           || 'West Virginia';
+  const chemical = document.getElementById('chemical').value.trim().toLowerCase() || 'vinyl chloride';
+  const panelNum = drawPanelNumber();
+  const paper    = city + ' ' + pick(PAPERS);
+  const chemData = CHEM_DATA[chemical] || null;
+  const session  = { city, county, state, chemical, panelNum, paper, chemData };
+
+  renderOutput(session);
+
+  const configText = buildConfig(session);
+  try {
+    await navigator.clipboard.writeText(configText);
+  } catch(e) {
+    const el = document.getElementById('copy-text');
+    const r  = document.createRange();
+    r.selectNodeContents(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(r);
+    document.execCommand('copy');
+  }
+
+  await pushToWorker(session);
+
+  btn.disabled = false;
+  btn.textContent = '⚡ Generate Session';
+}
+
+function openGem(){
+  window.open('https://gemini.google.com/gem/1CsLaR6jD1NINQExjZtUcXWGuDrL0_F-m', '_blank');
+}
+
+// ─────────────────────────────────────────────
+// PUSH TO WORKER
+// ─────────────────────────────────────────────
+async function pushToWorker(session){
+  const statusEl = document.getElementById('jb-status');
+  const dot      = document.getElementById('jb-dot');
+  const label    = document.getElementById('jb-label');
+  const sub      = document.getElementById('jb-sub');
+  const gemBtn   = document.getElementById('open-gem-btn');
+
+  statusEl.style.display = 'block';
+  dot.style.background   = 'var(--amber)';
+  label.textContent      = 'Pushing session…';
+  sub.textContent        = 'Config copied to clipboard';
+
+  const payload = {
+    chemical:   session.chemical.charAt(0).toUpperCase() + session.chemical.slice(1),
+    city:       session.city,
+    county:     session.county,
+    state:      session.state,
+    paper:      session.paper,
+    chemData:   session.chemData || null,
+    panelNum:   session.panelNum,
+    timestamp:  new Date().toISOString()
+  };
+
+  try {
+    const res = await fetch(WORKER_URL, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    });
+
+    if(!res.ok) throw new Error(`Worker returned ${res.status}`);
+
+    dot.style.background  = 'var(--green)';
+    label.textContent     = 'Config copied · Session live ✓';
+    sub.textContent       = 'Open the Gem, paste, press Enter';
+    gemBtn.style.display  = 'block';
+
+  } catch(err) {
+    dot.style.background  = 'var(--red)';
+    label.textContent     = 'Config copied · Worker push failed';
+    sub.textContent       = 'Open the Gem and paste the config manually';
+    gemBtn.style.display  = 'block';
+  }
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderOutput(s){
+  const { city, county, state, chemical, panelNum, paper, chemData } = s;
+  const chemDisplay = chemical.charAt(0).toUpperCase() + chemical.slice(1);
+  const panelMembers = getPanelMembers(panelNum);
+  const allMembers = [...panelMembers, { key:'BA', name:'Buffy Aldix', role:'Reporter, Local Paper' }];
+  const panelCardsHTML = allMembers.map(m => {
+    const isB = m.key === 'BA';
+    return `<div class="panel-card${isB?' reporter':''}"><div class="av${isB?' reporter':''}">${isB?'BA':m.key}</div><div class="panel-info"><div class="panel-name">${esc(m.name)}</div><div class="panel-role">${esc(m.role)}</div></div></div>`;
+  }).join('');
+
+  document.getElementById('empty-state').style.display = 'none';
+  const out = document.getElementById('session-output');
+  out.style.display      = 'flex';
+  out.style.flexDirection = 'column';
+  out.style.gap          = '16px';
+
+  const oldCard = document.getElementById('session-card');
+  const newCard = oldCard.cloneNode(false);
+  newCard.id = 'session-card';
+  oldCard.parentNode.replaceChild(newCard, oldCard);
+
+  newCard.innerHTML = `
+    <div class="sc-header">
+      <div>
+        <div class="sc-title">${esc(chemDisplay)} — ${esc(city)}, ${esc(state)}</div>
+        <div class="sc-sub">${esc(county)} · Panel #${panelNum} · ${esc(paper)}</div>
+      </div>
+    </div>
+    <div class="sc-body">
+      <div>
+        <div class="sc-sec-title">Location</div>
+        <div class="loc-row">
+          <div class="loc-chip"><span>City</span>${esc(city)}</div>
+          <div class="loc-chip"><span>County</span>${esc(county)}</div>
+          <div class="loc-chip"><span>State</span>${esc(state)}</div>
+        </div>
+      </div>
+      <div>
+        <div class="sc-sec-title">Chemical</div>
+        ${renderChemBox(chemical, chemDisplay, chemData)}
+      </div>
+      <div>
+        <div class="sc-sec-title">Panel Assignment — #${panelNum}</div>
+        <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:10px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">${panelCardsHTML}</div>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('copy-text').textContent = buildConfig(s);
+  const btn = document.getElementById('copy-btn');
+  btn.textContent = 'Copy';
+  btn.classList.remove('copied');
+}
+
+function renderChemBox(chemical, chemDisplay, d){
+  if(!d) return `
+    <div class="chem-box">
+      <div class="chem-name">${esc(chemDisplay)}</div>
+      <div style="font-size:11px;color:var(--text3);font-style:italic;margin-top:4px;">No pre-loaded data — Gem will use its own knowledge.</div>
+      <span class="chem-unknown">● Gem training knowledge</span>
+    </div>`;
+  return `
+    <div class="chem-box">
+      <div class="chem-name">${esc(chemDisplay)}</div>
+      <div class="chem-grid">
+        <div class="chem-item"><div class="chem-item-label">CAS RN</div><div class="chem-item-val">${esc(d.casRN)}</div></div>
+        <div class="chem-item"><div class="chem-item-label">Formula</div><div class="chem-item-val">${esc(d.formula)}</div></div>
+        <div class="chem-item"><div class="chem-item-label">OSHA PEL</div><div class="chem-item-val">${esc(d.osha_pel)}</div></div>
+        <div class="chem-item"><div class="chem-item-label">ACGIH TLV</div><div class="chem-item-val">${esc(d.acgih_tlv)}</div></div>
+        <div class="chem-item"><div class="chem-item-label">EPCRA threshold</div><div class="chem-item-val">${esc(d.epcra)}</div></div>
+        <div class="chem-item"><div class="chem-item-label">RMP threshold</div><div class="chem-item-val">${esc(d.rmp)}</div></div>
+        <div class="chem-item"><div class="chem-item-label">NFPA flammability</div><div class="chem-item-val">${esc(d.nfpa)}</div></div>
+        <div class="chem-item" style="grid-column:span 2">
+          <div class="chem-item-label">Key hazard</div>
+          <div class="chem-item-val" style="white-space:normal;line-height:1.5;">${esc(d.hazard)}</div>
+        </div>
+      </div>
+      <span class="chem-known">● Pre-loaded data</span>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+// BUILD CONFIG STRING
+// ─────────────────────────────────────────────
+function buildConfig(s){
+  const { city, county, state, chemical, panelNum, paper, chemData } = s;
+  const chemDisplay = chemical.charAt(0).toUpperCase() + chemical.slice(1);
+  const panelMembersList = [...getPanelMembers(panelNum).map(m=>m.name), 'Buffy Aldix (Reporter)'].join(', ');
+
+  const chemBlock = chemData ? `\nCHEMICAL DATA:\n` +
+    `  • CAS RN: ${chemData.casRN}\n` +
+    `  • Formula: ${chemData.formula}\n` +
+    `  • OSHA PEL: ${chemData.osha_pel}\n` +
+    `  • ACGIH TLV: ${chemData.acgih_tlv}\n` +
+    `  • EPCRA threshold: ${chemData.epcra}\n` +
+    `  • RMP threshold: ${chemData.rmp}\n` +
+    `  • NFPA flammability: ${chemData.nfpa}\n` +
+    `  • Key hazard: ${chemData.hazard}` : '';
+
+  return `SESSION CONFIG — LEPC TOWN HALL SIMULATION
+════════════════════════════════════════════════
+LOCATION: ${city}, ${county}, ${state}
+CHEMICAL: ${chemDisplay}
+LOCAL PAPER: ${paper}
+PANEL NUMBER: ${panelNum}
+PANEL MEMBERS: ${panelMembersList}${chemBlock}
+════════════════════════════════════════════════`;
+}
+
+// ─────────────────────────────────────────────
+// COPY
+// ─────────────────────────────────────────────
+async function copyConfig(){
+  const text = document.getElementById('copy-text').textContent;
+  const btn  = document.getElementById('copy-btn');
+  try { await navigator.clipboard.writeText(text); }
+  catch(e){
+    const el = document.getElementById('copy-text');
+    const r  = document.createRange();
+    r.selectNodeContents(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(r);
+    document.execCommand('copy');
+  }
+  btn.textContent = 'Copied ✓';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2500);
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
